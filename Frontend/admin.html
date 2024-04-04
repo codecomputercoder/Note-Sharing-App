@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        width: 50%;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      h1 {
+        text-align: center;
+        color: #30064f;
+      }
+
+      h2 {
+        color: #333;
+      }
+
+      input[type="file"] {
+        display: block;
+        margin: 10px auto;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      h3 {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      a {
+        color: #007bff;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Hello Teacher</h1>
+    <div class="container">
+      <h2>Select a File to Upload</h2>
+      <input
+        type="file"
+        id="fileInput"
+        accept=".txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+      />
+      <button id="uploadButton">Upload File</button>
+    </div>
+
+    <h3><a href="user.html">Want to See Uploaded Documents</a></h3>
+
+    <!-- <button  onclick="testFunction()">Show All Files</button> -->
+    <script src="admin.js"></script>
+  </body>
+</html>

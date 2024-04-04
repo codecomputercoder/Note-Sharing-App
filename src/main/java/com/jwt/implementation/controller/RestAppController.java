@@ -1,8 +1,10 @@
 package com.jwt.implementation.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 
@@ -22,11 +24,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.jwt.implementation.config.JwtGeneratorValidator;
 import com.jwt.implementation.model.FileDB;
 import com.jwt.implementation.model.LoginSuccess;
+import com.jwt.implementation.model.ResponseFile;
 import com.jwt.implementation.model.Role;
 import com.jwt.implementation.model.User;
 import com.jwt.implementation.model.UserDTO;
@@ -59,6 +65,8 @@ public class RestAppController {
 	@Autowired
     FileStorageService storageService;
 
+
+    @CrossOrigin
 	@PostMapping("/registration")
 	public ResponseEntity<Object> registerUser(@RequestBody UserDTO userDto) {
 		// User users = userService.save(userDto);
@@ -131,6 +139,34 @@ public class RestAppController {
 		return new ResponseEntity<Object>(map, st);
 	}
 
+
+	@CrossOrigin	
+	@GetMapping("/files")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_USER') ")
+    public ResponseEntity<List<ResponseFile>> getListFiles() {
+        List<ResponseFile> files = storageService.getAllFiles().map(dbFile -> {
+            String fileDownloadUri = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/files/")
+                    .path(dbFile.getId())
+                    .toUriString();
+
+            return new ResponseFile(
+                    dbFile.getName(),
+                    fileDownloadUri,
+                    dbFile.getType(),
+                    dbFile.getData().length);
+        }).collect(Collectors.toList());
+
+        // List<FileDB>files=storageService.getAllFiles();
+        // if(files.isEmpty()){
+        //     System.out.println("Null No file Exist");
+        // }
+        
+         //return "Hello";
+        return ResponseEntity.status(HttpStatus.OK).body(files);
+    }
+
 	@CrossOrigin
     @GetMapping("/files/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_USER') ")
@@ -140,6 +176,27 @@ public class RestAppController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.getName() + "\"")
                 .body(fileDB.getData());
+    }
+
+	@CrossOrigin
+    @PostMapping("/uploadsinglefile")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        String message = "";
+        try {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		String username = userDetails.getUsername();
+        System.out.println(username);
+            storageService.store(file,username);
+
+            message = "Uploaded the file successfully: " + file.getOriginalFilename();
+            return ResponseEntity.status(HttpStatus.OK).body(message);
+        } catch (Exception e) {
+            message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+        }
     }
 
 }
